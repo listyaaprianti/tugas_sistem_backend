@@ -5,7 +5,7 @@ require_once "../src/ProductRepository.php";
 $productRepo = new ProductRepository($pdo);
 
 $id = $_GET['id'] ?? null;
-if ($id) {
+if($id){
     $productRepo->delete($id);
 }
 

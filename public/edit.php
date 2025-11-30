@@ -14,24 +14,23 @@ $product = $productRepo->getById($id);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
+    $category = $_POST['category'];
     $price = $_POST['price'];
+    $stock = $_POST['stock'];
+    $status = $_POST['status'];
 
-    // Ambil gambar lama
-    $image = $product['image_path'] ?? null;
-
-    // Jika upload gambar baru
-    if (isset($_FILES['image']) && $_FILES['image']['name'] != '') {
-        $image = $_FILES['image']['name'];
-        move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/" . $image);
+    $image_path = $product['image_path'];
+    if (!empty($_FILES['image']['name'])) {
+        $image_path = $_FILES['image']['name'];
+        move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/" . $image_path);
     }
 
-    // Update produk
-    $productRepo->update($id, $name, $price, $image);
-
+    $productRepo->update($id, $name, $category, $price, $stock, $status, $image_path);
     header("Location: index.php");
     exit();
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,28 +38,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <div class="form-container">
-        <h2>Edit Produk</h2>
-        <form action="" method="post" enctype="multipart/form-data">
-            <label>Nama Produk:</label>
-            <input type="text" name="name" value="<?= htmlspecialchars($product['name']) ?>" required>
+<div class="form-container">
+    <h2>Edit Produk</h2>
+    <form action="" method="post" enctype="multipart/form-data">
+        <label>Nama Produk:</label>
+        <input type="text" name="name" value="<?= htmlspecialchars($product['name']) ?>" required>
 
-            <label>Harga:</label>
-            <input type="number" name="price" value="<?= $product['price'] ?>" required>
+        <label>Kategori:</label>
+        <input type="text" name="category" value="<?= htmlspecialchars($product['category']) ?>" required>
 
-            <label>Gambar:</label>
-            <?php 
-            $imgPath = "../uploads/" . ($product['image_path'] ?? '');
-            if (!empty($product['image_path']) && file_exists($imgPath)): ?>
-                <img src="<?= $imgPath ?>" width="150" alt="<?= htmlspecialchars($product['name']) ?>">
-            <?php else: ?>
-                <div class="no-image">No Image</div>
-            <?php endif; ?>
-            <input type="file" name="image">
+        <label>Harga:</label>
+        <input type="number" name="price" value="<?= $product['price'] ?>" required>
 
-            <button type="submit">Update</button>
-        </form>
+        <label>Stok:</label>
+        <input type="number" name="stock" value="<?= $product['stock'] ?>" required>
+
+        <label>Status:</label>
+        <select name="status">
+            <option value="active" <?= $product['status']=='active'?'selected':'' ?>>Active</option>
+            <option value="inactive" <?= $product['status']=='inactive'?'selected':'' ?>>Inactive</option>
+        </select>
+
+        <label>Gambar:</label>
+        <?php if($product['image_path']): ?>
+            <img src="../uploads/<?= $product['image_path'] ?>" width="100" style="margin-bottom:10px;"><br>
+        <?php endif; ?>
+        <input type="file" name="image">
+
+        <button type="submit">Update Produk</button>
         <a href="index.php">Kembali</a>
-    </div>
+    </form>
+</div>
 </body>
 </html>
