@@ -3,52 +3,38 @@
 class ProductRepository {
     private $pdo;
 
-    public function __construct($pdo) {
+    public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
     }
 
+    // Ambil semua produk
     public function getAll() {
         $stmt = $this->pdo->query("SELECT * FROM products ORDER BY id DESC");
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function create($data) {
-        $stmt = $this->pdo->prepare(
-            "INSERT INTO products (name, category, price, stock, image_path, status) VALUES (?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->execute([
-            $data['name'], 
-            $data['category'], 
-            $data['price'], 
-            $data['stock'], 
-            $data['image_path'], 
-            $data['status']
-        ]);
-    }
-
+    // Ambil produk berdasarkan ID
     public function getById($id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM products WHERE id=?");
+        $stmt = $this->pdo->prepare("SELECT * FROM products WHERE id = ?");
         $stmt->execute([$id]);
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function update($id, $data) {
-        $stmt = $this->pdo->prepare(
-            "UPDATE products SET name=?, category=?, price=?, stock=?, image_path=?, status=? WHERE id=?"
-        );
-        $stmt->execute([
-            $data['name'], 
-            $data['category'], 
-            $data['price'], 
-            $data['stock'], 
-            $data['image_path'], 
-            $data['status'], 
-            $id
-        ]);
+    // Tambah produk baru
+    public function create($name, $price, $image_path) {
+        $stmt = $this->pdo->prepare("INSERT INTO products (name, price, image_path) VALUES (?, ?, ?)");
+        return $stmt->execute([$name, $price, $image_path]);
     }
 
+    // Update produk
+    public function update($id, $name, $price, $image_path) {
+        $stmt = $this->pdo->prepare("UPDATE products SET name = ?, price = ?, image_path = ? WHERE id = ?");
+        return $stmt->execute([$name, $price, $image_path, $id]);
+    }
+
+    // Hapus produk
     public function delete($id) {
-        $stmt = $this->pdo->prepare("DELETE FROM products WHERE id=?");
-        $stmt->execute([$id]);
+        $stmt = $this->pdo->prepare("DELETE FROM products WHERE id = ?");
+        return $stmt->execute([$id]);
     }
 }

@@ -16,18 +16,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $price = $_POST['price'];
 
-    $image = $product['image'];
-    if (!empty($_FILES['image']['name'])) {
+    // Ambil gambar lama
+    $image = $product['image_path'] ?? null;
+
+    // Jika upload gambar baru
+    if (isset($_FILES['image']) && $_FILES['image']['name'] != '') {
         $image = $_FILES['image']['name'];
         move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/" . $image);
     }
 
+    // Update produk
     $productRepo->update($id, $name, $price, $image);
+
     header("Location: index.php");
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -35,20 +39,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <h2>Edit Produk</h2>
-    <form action="" method="post" enctype="multipart/form-data">
-        <label>Nama Produk:</label><br>
-        <input type="text" name="name" value="<?= htmlspecialchars($product['name']) ?>" required><br><br>
+    <div class="form-container">
+        <h2>Edit Produk</h2>
+        <form action="" method="post" enctype="multipart/form-data">
+            <label>Nama Produk:</label>
+            <input type="text" name="name" value="<?= htmlspecialchars($product['name']) ?>" required>
 
-        <label>Harga:</label><br>
-        <input type="number" name="price" value="<?= $product['price'] ?>" required><br><br>
+            <label>Harga:</label>
+            <input type="number" name="price" value="<?= $product['price'] ?>" required>
 
-        <label>Gambar:</label><br>
-        <img src="../uploads/<?= $product['image'] ?>" width="100"><br>
-        <input type="file" name="image"><br><br>
+            <label>Gambar:</label>
+            <?php 
+            $imgPath = "../uploads/" . ($product['image_path'] ?? '');
+            if (!empty($product['image_path']) && file_exists($imgPath)): ?>
+                <img src="<?= $imgPath ?>" width="150" alt="<?= htmlspecialchars($product['name']) ?>">
+            <?php else: ?>
+                <div class="no-image">No Image</div>
+            <?php endif; ?>
+            <input type="file" name="image">
 
-        <button type="submit">Update</button>
-    </form>
-    <a href="index.php">Kembali</a>
+            <button type="submit">Update</button>
+        </form>
+        <a href="index.php">Kembali</a>
+    </div>
 </body>
 </html>
